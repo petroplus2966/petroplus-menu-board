@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Menu Board</title>
+  <link rel="stylesheet" href="style.css" />
+  <!-- Optional: refresh page every 5 minutes -->
+  <meta http-equiv="refresh" content="300">
+</head>
+
+<body>
+  <main class="board">
+    <!-- ZONE 1 (Top Left): Menu JPEG -->
+    <section class="zone z1">
+      <img class="fit" src="assets/menu.jpg" alt="Menu" />
+    </section>
+
+    <!-- ZONE 2 (Top Right): News (embed) OR image -->
+    <section class="zone z2">
+      <!-- Option A: embed a website -->
+      <iframe
+        class="frame"
+        src="https://www.espn.com"
+        title="News"
+        loading="lazy"
+        referrerpolicy="no-referrer"
+      ></iframe>
+
+      <!-- Option B: use an image instead (uncomment and remove iframe)
+      <img class="fit" src="assets/promo1.jpg" alt="Promo" />
+      -->
+    </section>
+
+    <!-- ZONE 3 (Bottom Left): Promo image -->
+    <section class="zone z3">
+      <img class="fit" src="assets/promo1.jpg" alt="Promo 1" />
+    </section>
+
+    <!-- ZONE 4 (Bottom Right): Another promo or QR -->
+    <section class="zone z4">
+      <img class="fit" src="assets/promo2.jpg" alt="Promo 2" />
+    </section>
+  </main>
+</body>
+</html>
