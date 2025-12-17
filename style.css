@@ -12,7 +12,7 @@
   --tickerH: 200;
 }
 
-/* ---------- RESET ---------- */
+/* ================= RESET ================= */
 *{ box-sizing:border-box; }
 
 html, body{
@@ -23,7 +23,7 @@ html, body{
   font-family: Arial, Helvetica, sans-serif;
 }
 
-/* ---------- SCREEN / CANVAS ---------- */
+/* ================= SCREEN / CANVAS ================= */
 .screen{
   width:100vw;
   height:100vh;
@@ -32,7 +32,7 @@ html, body{
   overflow:hidden;
 }
 
-/* 4K canvas scaled to viewport (Chrome-safe) */
+/* 4K canvas scaled to viewport (Chrome + signage safe) */
 .canvas{
   width:3840px;
   height:2160px;
@@ -44,7 +44,7 @@ html, body{
   transform-origin: center center;
 }
 
-/* ---------- ZONES ---------- */
+/* ================= ZONES ================= */
 .zone{
   position:absolute;
   background:#0f0f0f;
@@ -75,7 +75,7 @@ html, body{
   height:1050px;
 }
 
-/* ---------- TICKER (3840 × 200) ---------- */
+/* ================= TICKER (3840 × 200) ================= */
 .ticker{
   position:absolute;
   left:0;
@@ -84,43 +84,44 @@ html, body{
   height:200px;
 
   background:#1b1b1b;
-  color:#e7e7e7;
+  color:#ffffff;
 
   display:grid;
-  grid-template-columns: 0.6fr 2.8fr 0.6fr;
+  grid-template-columns: 0.5fr 3fr 0.7fr;
   align-items:center;
 
-  padding:0 48px;
+  padding:0 64px;
   font-weight:900;
   text-transform:uppercase;
-  letter-spacing:1px;
+  letter-spacing:1.2px;
 }
 
-/* ---------- TICKER RIGHT STACK ---------- */
+/* ================= RIGHT STACK ================= */
 .tickRightStack{
   display:flex;
   flex-direction:column;
   align-items:flex-end;
   justify-content:center;
-  gap:6px;
+  text-align:right;
   line-height:1.05;
+  gap:6px;
 }
 
 .tickRightStack .loc{
-  font-size:30px;
+  font-size:38px;
   opacity:0.95;
 }
 
 .tickRightStack .date{
-  font-size:26px;
+  font-size:32px;
   opacity:0.85;
 }
 
 .tickRightStack .time{
-  font-size:56px;
+  font-size:72px;
 }
 
-/* ---------- TICKER SCROLL ---------- */
+/* ================= SCROLLING FORECAST ================= */
 .tickScroll{
   overflow:hidden;
   white-space:nowrap;
@@ -134,8 +135,8 @@ html, body{
 .marqueeTrack{
   display:inline-block;
   padding-left:100%;
-  animation: marquee 55s linear infinite; /* slower scroll */
-  font-size:34px;
+  animation: marquee 65s linear infinite; /* slow + readable */
+  font-size:42px;
   will-change:transform;
 }
 
@@ -144,7 +145,7 @@ html, body{
   100% { transform: translateX(-100%); }
 }
 
-/* ---------- IMAGES ---------- */
+/* ================= IMAGES ================= */
 .img{
   width:100%;
   height:100%;
@@ -158,149 +159,4 @@ html, body{
 .contain{
   object-fit:contain;
   background:#000;
-}:root{
-  --W: 3840;
-  --H: 2160;
-
-  --menuW: 2790;
-  --menuH: 1960;
-
-  --promoW: 1050;
-  --promoA_H: 910;
-  --promoB_H: 1050;
-
-  --tickerH: 200;
 }
-
-*{ box-sizing:border-box; }
-
-html, body{
-  height:100%;
-  margin:0;
-  background:#000;
-  overflow:hidden;
-  font-family: Arial, Helvetica, sans-serif;
-}
-
-/* Center the 4K canvas on any screen */
-.screen{
-  width:100vw;
-  height:100vh;
-  display:grid;
-  place-items:center;
-  overflow:hidden;
-}
-
-/* 3840x2160 canvas scaled to fit viewport (Chrome-safe) */
-.canvas{
-  width: calc(var(--W) * 1px);
-  height: calc(var(--H) * 1px);
-  position: relative;
-
-  /* scale = min(viewportW/3840, viewportH/2160) */
-  --scale: min(calc(100vw / var(--W)), calc(100vh / var(--H)));
-  transform: scale(var(--scale));
-  transform-origin: center center;
-}
-
-/* Zones */
-.zone{
-  position:absolute;
-  background:#0f0f0f;
-  overflow:hidden;
-}
-
-/* MENU: 2790x1960 */
-.menu{
-  left:0;
-  top:0;
-  width: calc(var(--menuW) * 1px);
-  height: calc(var(--menuH) * 1px);
-}
-
-/* PROMO A: 1050x910 (top right) */
-.promoA{
-  left: calc(var(--menuW) * 1px);
-  top:0;
-  width: calc(var(--promoW) * 1px);
-  height: calc(var(--promoA_H) * 1px);
-}
-
-/* PROMO B: 1050x1050 (bottom right) */
-.promoB{
-  left: calc(var(--menuW) * 1px);
-  top: calc(var(--promoA_H) * 1px);
-  width: calc(var(--promoW) * 1px);
-  height: calc(var(--promoB_H) * 1px);
-}
-
-/* TICKER: 3840x200 */
-.ticker{
-  position:absolute;
-  left:0;
-  top: calc(var(--menuH) * 1px);
-  width: calc(var(--W) * 1px);
-  height: calc(var(--tickerH) * 1px);
-
-  background:#1b1b1b;
-  color:#e7e7e7;
-
-  display:grid;
-  grid-template-columns: 1fr 2fr 1fr;
-  align-items:center;
-
-  padding:0 48px;
-  font-weight:900;
-  text-transform:uppercase;
-  letter-spacing:1px;
-}
-
-.tickLeft{
-  display:flex;
-  align-items:baseline;
-  gap:18px;
-}
-
-.tickRight{
-  text-align:right;
-  font-size:56px;
-}
-
-/* Ticker typography */
-.label{ font-size:36px; }
-.muted{ opacity:.85; font-size:28px; }
-.sep{ opacity:.5; margin:0 18px; }
-
-/* --- 7-day scrolling forecast ticker --- */
-.tickScroll{
-  overflow:hidden;
-  white-space:nowrap;
-}
-
-.marquee{
-  width:100%;
-  overflow:hidden;
-}
-
-.marqueeTrack{
-  display:inline-block;
-  padding-left: 100%;
-  animation: marquee 32s linear infinite;
-  font-size: 34px;
-  will-change: transform;
-}
-
-@keyframes marquee{
-  0%   { transform: translateX(0); }
-  100% { transform: translateX(-100%); }
-}
-
-/* Images */
-.img{
-  width:100%;
-  height:100%;
-  display:block;
-}
-
-.cover{ object-fit:cover; }
-.contain{ object-fit:contain; background:#000; }
