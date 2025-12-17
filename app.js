@@ -1,3 +1,7 @@
+document.addEventListener("DOMContentLoaded", () => {
+  const t = document.getElementById("forecastTrack");
+  if (t) t.textContent = "JS LOADED ✅ (fetching forecast...)";
+});
 // ---------- CLOCK + DATE ----------
 function setClockAndDate() {
   const now = new Date();
