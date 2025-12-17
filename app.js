@@ -19,27 +19,46 @@ setInterval(updateClockAndDate, 10_000);
 
 
 /* =========================================================
+   TICKER MODE ROTATION (WEATHER <-> SPORTS)
+========================================================= */
+let weatherLine = "FETCHING 7-DAY FORECAST…";
+let sportsLine = "FETCHING SPORTS HEADLINES…";
+let tickerMode = "weather"; // "weather" | "sports"
+
+function setTickerText(line) {
+  const track = document.getElementById("forecastTrack");
+  if (!track) return;
+
+  // duplicate for seamless scroll
+  track.textContent = `${line}   •   ${line}`;
+}
+
+function rotateTickerMode() {
+  tickerMode = (tickerMode === "weather") ? "sports" : "weather";
+  setTickerText(tickerMode === "weather" ? weatherLine : sportsLine);
+}
+
+// Switch between weather and sports every 30 seconds
+setInterval(rotateTickerMode, 30_000);
+
+
+/* =========================================================
    WEATHER (CURRENT + 7-DAY)
    Open-Meteo — no API key
-   Handles BOTH `current` and legacy `current_weather` formats
+   Handles BOTH `current` and legacy `current_weather`
 ========================================================= */
 async function loadWeather() {
-  const track   = document.getElementById("forecastTrack");
   const nowIcon = document.getElementById("nowIcon");
   const nowTemp = document.getElementById("nowTemp");
   const nowMeta = document.getElementById("nowMeta");
 
-  // Visible status so you know JS is running
-  if (track) track.textContent = "FETCHING 7-DAY FORECAST…";
   if (nowIcon) nowIcon.textContent = "—";
   if (nowTemp) nowTemp.textContent = "—°C";
   if (nowMeta) nowMeta.textContent = "FETCHING CURRENT…";
 
-  // Ohsweken approx
   const lat = 42.93;
   const lon = -80.12;
 
-  // Ask for BOTH formats for maximum compatibility
   const url =
     "https://api.open-meteo.com/v1/forecast" +
     `?latitude=${lat}&longitude=${lon}` +
@@ -50,7 +69,6 @@ async function loadWeather() {
     `&timezone=America%2FToronto`;
 
   function conditionFromCode(code) {
-    // WMO weather code mapping (signage-friendly)
     if (code === 0) return { icon: "☀️", text: "CLEAR" };
     if ([1, 2].includes(code)) return { icon: "⛅️", text: "PARTLY CLOUDY" };
     if (code === 3) return { icon: "☁️", text: "CLOUDY" };
@@ -73,19 +91,17 @@ async function loadWeather() {
   try {
     const res = await fetch(url, { cache: "no-store" });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
     const data = await res.json();
 
-    /* ---------- CURRENT CONDITIONS (NOW) ---------- */
+    // CURRENT (NOW)
     const c = data?.current || null;
     const cw = data?.current_weather || null;
 
-    // Pull from modern `current` first, fallback to legacy `current_weather`
-    const temp = (c?.temperature_2m ?? cw?.temperature ?? null);
+    const temp  = (c?.temperature_2m ?? cw?.temperature ?? null);
     const feels = (c?.apparent_temperature ?? null);
-    const hum = (c?.relative_humidity_2m ?? null);
-    const wind = (c?.wind_speed_10m ?? cw?.windspeed ?? null);
-    const code = (c?.weather_code ?? cw?.weathercode ?? null);
+    const hum   = (c?.relative_humidity_2m ?? null);
+    const wind  = (c?.wind_speed_10m ?? cw?.windspeed ?? null);
+    const code  = (c?.weather_code ?? cw?.weathercode ?? null);
 
     if (nowTemp && nowMeta && nowIcon && temp != null) {
       const t = Math.round(temp);
@@ -99,13 +115,12 @@ async function loadWeather() {
       if (feels != null) metaParts.push(`FEELS ${Math.round(feels)}°`);
       if (hum != null) metaParts.push(`HUM ${Math.round(hum)}%`);
       if (wind != null) metaParts.push(`WIND ${Math.round(wind)} KM/H`);
-
       nowMeta.textContent = metaParts.join(" • ");
     } else {
       if (nowMeta) nowMeta.textContent = "CURRENT UNAVAILABLE";
     }
 
-    /* ---------- 7-DAY FORECAST (SCROLL) ---------- */
+    // 7-DAY FORECAST (ticker line)
     const days  = data?.daily?.time ?? [];
     const highs = data?.daily?.temperature_2m_max ?? [];
     const lows  = data?.daily?.temperature_2m_min ?? [];
@@ -126,21 +141,78 @@ async function loadWeather() {
       parts.push(`${dow} ${md} ${dailyIcon(hi, mm)} ${hi}°/${lo}°`);
     }
 
-    const line = parts.join("   •   ");
-    if (track) track.textContent = `${line}   •   ${line}`;
+    weatherLine = parts.join("   •   ");
+
+    // If we’re currently in weather mode, update immediately
+    if (tickerMode === "weather") setTickerText(weatherLine);
 
   } catch (err) {
     console.error("Weather error:", err);
-
-    if (track) track.textContent =
-      "WEATHER UNAVAILABLE   •   WEATHER UNAVAILABLE   •   WEATHER UNAVAILABLE";
+    weatherLine = "WEATHER UNAVAILABLE";
+    if (tickerMode === "weather") setTickerText(weatherLine);
+    const nowMeta = document.getElementById("nowMeta");
     if (nowMeta) nowMeta.textContent = "WEATHER UNAVAILABLE";
   }
 }
 
-// Initial load + refresh every 30 minutes
+// Weather: initial + refresh every 30 minutes
 loadWeather();
 setInterval(loadWeather, 30 * 60 * 1000);
+
+
+/* =========================================================
+   SPORTSNET RSS -> HEADLINES (for ticker)
+   Uses AllOrigins CORS proxy, parses RSS XML in browser
+========================================================= */
+async function loadSportsHeadlines() {
+  // Sportsnet main feed (you can swap to NHL/NBA/etc later)
+  const rssUrl = "https://www.sportsnet.ca/feed/";
+  const proxy = "https://api.allorigins.win/get?url=" + encodeURIComponent(rssUrl);
+
+  function sportEmoji(title) {
+    const t = title.toLowerCase();
+    if (t.includes("nhl") || t.includes("leaf") || t.includes("hockey")) return "🏒";
+    if (t.includes("nba") || t.includes("raptor") || t.includes("basketball")) return "🏀";
+    if (t.includes("mlb") || t.includes("blue jay") || t.includes("baseball")) return "⚾";
+    if (t.includes("nfl") || t.includes("football")) return "🏈";
+    if (t.includes("soccer") || t.includes("mls") || t.includes("premier")) return "⚽";
+    return "📰";
+  }
+
+  try {
+    const res = await fetch(proxy, { cache: "no-store" });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const json = await res.json();
+
+    const xmlText = json?.contents;
+    if (!xmlText) throw new Error("No RSS contents");
+
+    const doc = new DOMParser().parseFromString(xmlText, "text/xml");
+    const items = Array.from(doc.querySelectorAll("item"));
+
+    const titles = items
+      .map(it => (it.querySelector("title")?.textContent || "").trim())
+      .filter(Boolean)
+      .slice(0, 10);
+
+    if (!titles.length) throw new Error("No titles");
+
+    const parts = titles.map(t => `${sportEmoji(t)} ${t.toUpperCase()}`);
+    sportsLine = parts.join("   •   ");
+
+    // If we’re currently in sports mode, update immediately
+    if (tickerMode === "sports") setTickerText(sportsLine);
+
+  } catch (err) {
+    console.error("Sports RSS error:", err);
+    sportsLine = "SPORTS HEADLINES UNAVAILABLE";
+    if (tickerMode === "sports") setTickerText(sportsLine);
+  }
+}
+
+// Sports: initial + refresh every 10 minutes
+loadSportsHeadlines();
+setInterval(loadSportsHeadlines, 10 * 60 * 1000);
 
 
 /* =========================================================
