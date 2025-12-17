@@ -3,9 +3,16 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Menu Board</title>
+
+  <title>Petro Plus Menu Board</title>
+
+  <!-- Styles -->
   <link rel="stylesheet" href="style.css" />
+
+  <!-- App logic -->
   <script defer src="app.js"></script>
+
+  <!-- Safety refresh for signage -->
   <meta http-equiv="refresh" content="300">
 </head>
 
@@ -13,38 +20,61 @@
   <div class="screen">
     <div class="canvas">
 
-      <!-- MENU -->
+      <!-- ================= MENU ================= -->
+      <!-- 2790 x 1960 -->
       <section class="zone menu">
-        <img class="img contain" src="menu.jpg" alt="Menu" />
+        <img
+          class="img contain"
+          src="menu.jpg"
+          alt="Menu"
+        />
       </section>
 
-      <!-- PROMO A (1050 x 910) -->
+      <!-- ================= PROMO A ================= -->
+      <!-- 1050 x 910 -->
       <section class="zone promoA">
-        <img id="promoTopImg" class="img cover" src="promo1.jpg" alt="Promo A" />
+        <img
+          id="promoTopImg"
+          class="img cover"
+          src="promo1.jpg"
+          alt="Promo A"
+        />
       </section>
 
-      <!-- PROMO B (1050 x 1050) -->
+      <!-- ================= PROMO B ================= -->
+      <!-- 1050 x 1050 -->
       <section class="zone promoB">
-        <img id="promoBottomImg" class="img cover" src="promo2.jpg" alt="Promo B" />
+        <img
+          id="promoBottomImg"
+          class="img cover"
+          src="promo2.jpg"
+          alt="Promo B"
+        />
       </section>
 
-      <!-- TICKER -->
+      <!-- ================= TICKER ================= -->
+      <!-- 3840 x 200 -->
       <footer class="ticker">
-  <div class="tickLeft">
-    <span class="label">OHSWEKEN</span>
-    <span class="muted" id="dateText">—</span>
-  </div>
 
-  <div class="tickScroll">
-    <div class="marquee">
-      <div class="marqueeTrack" id="forecastTrack">
-        Loading 7-day forecast…
-      </div>
-    </div>
-  </div>
+        <!-- Left: location + date -->
+        <div class="tickLeft">
+          <span class="label">OHSWEKEN</span>
+          <span class="muted" id="dateText">—</span>
+        </div>
 
-  <div class="tickRight" id="clock">—:—</div>
-</footer>
+        <!-- Middle: 7-day scrolling forecast -->
+        <div class="tickScroll">
+          <div class="marquee">
+            <div class="marqueeTrack" id="forecastTrack">
+              Loading 7-day forecast…
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: clock -->
+        <div class="tickRight" id="clock">—:—</div>
+
+      </footer>
 
     </div>
   </div>
