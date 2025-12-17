@@ -32,7 +32,7 @@ html, body{
   overflow:hidden;
 }
 
-/* 4K canvas scaled to viewport (Chrome + signage safe) */
+/* 4K canvas scaled safely to viewport */
 .canvas{
   width:3840px;
   height:2160px;
@@ -87,7 +87,7 @@ html, body{
   color:#ffffff;
 
   display:grid;
-  grid-template-columns: 0.5fr 3fr 0.7fr;
+  grid-template-columns: 20% 60% 20%;
   align-items:center;
 
   padding:0 64px;
@@ -96,15 +96,73 @@ html, body{
   letter-spacing:1.2px;
 }
 
-/* ================= RIGHT STACK ================= */
+/* ---------- NOW (CURRENT CONDITIONS) ---------- */
+.tickNow{
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  gap:6px;
+  line-height:1.05;
+}
+
+.nowTop{
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+
+.nowLabel{
+  font-size:30px;
+  opacity:0.9;
+}
+
+.nowIcon{
+  font-size:38px;
+}
+
+.nowTemp{
+  font-size:68px;
+}
+
+.nowMeta{
+  font-size:24px;
+  opacity:0.85;
+  letter-spacing:1px;
+}
+
+/* ---------- SCROLLING FORECAST ---------- */
+.tickScroll{
+  overflow:hidden;
+  white-space:nowrap;
+}
+
+.marquee{
+  width:100%;
+  overflow:hidden;
+}
+
+.marqueeTrack{
+  display:inline-block;
+  padding-left:100%;
+  animation: marquee 65s linear infinite;
+  font-size:44px;
+  will-change:transform;
+}
+
+@keyframes marquee{
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-100%); }
+}
+
+/* ---------- RIGHT STACK (LOCATION / DATE / TIME) ---------- */
 .tickRightStack{
   display:flex;
   flex-direction:column;
   align-items:flex-end;
   justify-content:center;
   text-align:right;
-  line-height:1.05;
   gap:6px;
+  line-height:1.05;
 }
 
 .tickRightStack .loc{
@@ -119,30 +177,6 @@ html, body{
 
 .tickRightStack .time{
   font-size:72px;
-}
-
-/* ================= SCROLLING FORECAST ================= */
-.tickScroll{
-  overflow:hidden;
-  white-space:nowrap;
-}
-
-.marquee{
-  width:100%;
-  overflow:hidden;
-}
-
-.marqueeTrack{
-  display:inline-block;
-  padding-left:100%;
-  animation: marquee 65s linear infinite; /* slow + readable */
-  font-size:42px;
-  will-change:transform;
-}
-
-@keyframes marquee{
-  0%   { transform: translateX(0); }
-  100% { transform: translateX(-100%); }
 }
 
 /* ================= IMAGES ================= */
