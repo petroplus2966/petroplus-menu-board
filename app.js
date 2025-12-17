@@ -28,12 +28,12 @@ setInterval(updateClockAndDate, 10_000);
   next.setHours(2, 0, 0, 0);
   if (next <= now) next.setDate(next.getDate() + 1);
 
-  setTimeout(() => location.reload(), next.getTime() - now.getTime());
+  setTimeout(() => location.reload(), next - now);
 })();
 
 
 /* =========================================================
-   TICKER CORE (CONTINUOUS, NO SWITCHING)
+   TICKER CORE (CONTINUOUS — SPORTS BAR STYLE)
 ========================================================= */
 const track = document.getElementById("forecastTrack");
 
@@ -43,10 +43,13 @@ let sportsText  = "SPORTS LOADING…";
 function rebuildTicker() {
   if (!track) return;
 
-  // Repeat to ensure long, smooth scroll at same speed
-  const combined =
-    `${weatherText}   •   ${sportsText}   •   ` +
-    `${weatherText}   •   ${sportsText}`;
+  const base = `${weatherText}   •   ${sportsText}`;
+
+  // Pad heavily so crawl is slow & readable
+  let combined = base;
+  while (combined.length < 1600) {
+    combined += "   •   " + base;
+  }
 
   track.textContent = combined;
 }
@@ -56,7 +59,7 @@ function rebuildTicker() {
    WEATHER (7-DAY FORECAST)
 ========================================================= */
 async function loadWeather() {
-  const lat = 42.93;    // Ohsweken
+  const lat = 42.93;   // Ohsweken
   const lon = -80.12;
 
   const url =
@@ -65,10 +68,10 @@ async function loadWeather() {
     `&daily=temperature_2m_max,temperature_2m_min,precipitation_sum` +
     `&forecast_days=7&timezone=America%2FToronto`;
 
-  function icon(mm, hi) {
-    if (mm >= 5) return "🌧️";
-    if (mm > 0)  return "🌦️";
-    if (hi <= 0) return "❄️";
+  function icon(rain, hi) {
+    if (rain >= 5) return "🌧️";
+    if (rain > 0)  return "🌦️";
+    if (hi <= 0)   return "❄️";
     return "☀️";
   }
 
@@ -76,10 +79,10 @@ async function loadWeather() {
     const res  = await fetch(url, { cache:"no-store" });
     const data = await res.json();
 
-    const days  = data.daily.time;
-    const hi    = data.daily.temperature_2m_max;
-    const lo    = data.daily.temperature_2m_min;
-    const rain  = data.daily.precipitation_sum;
+    const days = data.daily.time;
+    const hi   = data.daily.temperature_2m_max;
+    const lo   = data.daily.temperature_2m_min;
+    const rain = data.daily.precipitation_sum;
 
     const parts = days.map((d, i) => {
       const date = new Date(d + "T00:00:00");
@@ -123,7 +126,7 @@ async function loadSports() {
     const data = await res.json();
 
     const headlines = data.items
-      .slice(0, 8)
+      .slice(0, 10)
       .map(h => `${emoji(h.title)} ${h.title.toUpperCase()}`);
 
     sportsText = `SPORTS: ${headlines.join("   •   ")}`;
