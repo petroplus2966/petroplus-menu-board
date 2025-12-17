@@ -1,18 +1,9 @@
 /* =========================================================
-   ROOT VARIABLES
+   ROOT
 ========================================================= */
 :root{
   --W: 3840;
   --H: 2160;
-
-  --menuW: 2790;
-  --menuH: 1960;
-
-  --promoW: 1050;
-  --promoA_H: 910;
-  --promoB_H: 1050;
-
-  --tickerH: 200;
 }
 
 /* =========================================================
@@ -49,7 +40,7 @@ html, body{
   height:2160px;
   position:relative;
 
-  /* Chrome + signage safe scaling */
+  /* Scale to any display safely */
   --scale: min(calc(100vw / 3840), calc(100vh / 2160));
   transform: scale(var(--scale));
   transform-origin: center center;
@@ -60,11 +51,11 @@ html, body{
 ========================================================= */
 .zone{
   position:absolute;
-  background:#0f0f0f;
+  background:#000;
   overflow:hidden;
 }
 
-/* MENU */
+/* MENU (2790 × 1960) */
 .menu{
   left:0;
   top:0;
@@ -72,7 +63,7 @@ html, body{
   height:1960px;
 }
 
-/* PROMO A */
+/* PROMO A (1050 × 910) */
 .promoA{
   left:2790px;
   top:0;
@@ -80,7 +71,7 @@ html, body{
   height:910px;
 }
 
-/* PROMO B */
+/* PROMO B (1050 × 1050) */
 .promoB{
   left:2790px;
   top:910px;
@@ -89,7 +80,7 @@ html, body{
 }
 
 /* =========================================================
-   TICKER — HARD GRID (DO NOT OVERRIDE)
+   TICKER (3840 × 200) — HARD GRID
 ========================================================= */
 .ticker{
   position:absolute;
@@ -99,7 +90,7 @@ html, body{
   height:200px;
 
   background:#1b1b1b;
-  color:#ffffff;
+  color:#fff;
 
   display:grid !important;
   grid-template-columns: 20% 60% 20% !important;
@@ -112,7 +103,7 @@ html, body{
 }
 
 /* =========================================================
-   LEFT: CURRENT CONDITIONS (20%)
+   LEFT — CURRENT CONDITIONS (20%)
 ========================================================= */
 .tickNow{
   display:flex;
@@ -147,7 +138,7 @@ html, body{
 }
 
 /* =========================================================
-   MIDDLE: SCROLLING FORECAST (60%)
+   MIDDLE — SCROLLING FORECAST (60%)
 ========================================================= */
 .tickScroll{
   width:100%;
@@ -169,12 +160,12 @@ html, body{
 }
 
 @keyframes marquee{
-  0%   { transform: translateX(0); }
-  100% { transform: translateX(-100%); }
+  from { transform: translateX(0); }
+  to   { transform: translateX(-100%); }
 }
 
 /* =========================================================
-   RIGHT: LOCATION / DATE / TIME (20%)
+   RIGHT — LOCATION / DATE / TIME (20%)
 ========================================================= */
 .tickRightStack{
   display:flex;
@@ -201,7 +192,7 @@ html, body{
 }
 
 /* =========================================================
-   IMAGES
+   IMAGES — IMPORTANT
 ========================================================= */
 .img{
   width:100%;
@@ -209,11 +200,14 @@ html, body{
   display:block;
 }
 
-.cover{
-  object-fit:cover;
-}
-
+/* Menu should preserve full layout */
 .contain{
   object-fit:contain;
+  background:#000;
+}
+
+/* Promos MUST fill the zone */
+.cover{
+  object-fit:cover;
   background:#000;
 }
