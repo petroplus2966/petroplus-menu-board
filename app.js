@@ -18,26 +18,17 @@ setInterval(updateClockAndDate, 10_000);
 
 
 /* =========================================================
-   DAILY RELOAD @ 2:00 AM (America/Toronto local device time)
+   DAILY RELOAD @ 2:00 AM (device local time)
 ========================================================= */
 function scheduleDailyReloadAt2AM() {
   const now = new Date();
   const next = new Date(now);
 
-  next.setHours(2, 0, 0, 0); // 2:00:00 AM today
-
-  // If it's already past 2AM today, schedule for tomorrow
-  if (next <= now) {
-    next.setDate(next.getDate() + 1);
-  }
+  next.setHours(2, 0, 0, 0);
+  if (next <= now) next.setDate(next.getDate() + 1);
 
   const ms = next.getTime() - now.getTime();
-
-  console.log("Next 2AM reload scheduled in ms:", ms);
-
-  setTimeout(() => {
-    location.reload();
-  }, ms);
+  setTimeout(() => location.reload(), ms);
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -46,38 +37,97 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 /* =========================================================
-   TICKER MODE ROTATION (WEATHER <-> SPORTS)
+   TICKER CONTROL (NO SWITCHING UNTIL READY + FULL CYCLE)
 ========================================================= */
 let weatherLine = "WEATHER: FETCHING…";
 let sportsLine  = "SPORTS: FETCHING…";
-let tickerMode  = "weather"; // "weather" | "sports"
 
-function setTickerText(line) {
+let weatherReady = false;
+let sportsReady  = false;
+
+let tickerMode = "weather"; // "weather" | "sports"
+let tickerLoopStarted = false;
+
+function getMarqueeDurationMs() {
+  const track = document.getElementById("forecastTrack");
+  if (!track) return 70_000; // fallback
+
+  const dur = getComputedStyle(track).animationDuration || "70s";
+  // supports "70s" or "70000ms"
+  if (dur.endsWith("ms")) return Math.max(10_000, parseFloat(dur));
+  if (dur.endsWith("s"))  return Math.max(10_000, parseFloat(dur) * 1000);
+  return 70_000;
+}
+
+function restartMarquee() {
   const track = document.getElementById("forecastTrack");
   if (!track) return;
+  track.style.animation = "none";
+  track.offsetHeight; // force reflow
+  track.style.animation = "";
+}
+
+function setTickerText(line, { restart = false } = {}) {
+  const track = document.getElementById("forecastTrack");
+  if (!track) return;
+
+  // duplicate for seamless scroll
   track.textContent = `${line}   •   ${line}`;
+
+  if (restart) restartMarquee();
 }
 
-function showWeather() {
+function buildSlowSportsLine(headlines) {
+  // Make sports feel as “slow” as weather by ensuring long text
+  // (short strings appear to zip by even at same animation duration).
+  const base = "SPORTS: " + headlines.join("   •   ");
+
+  // Repeat until we have plenty of length
+  let out = base;
+  while (out.length < 900) out += "   •   " + base;
+  return out;
+}
+
+async function tickerLoop() {
+  // Don’t start switching until weather is ready
+  if (!weatherReady) {
+    setTickerText(weatherLine, { restart: false });
+    setTimeout(tickerLoop, 2000);
+    return;
+  }
+
+  // Show WEATHER first, always
   tickerMode = "weather";
-  setTickerText(weatherLine);
-}
+  setTickerText(weatherLine, { restart: true });
 
-function showSports() {
+  // Hold for a full marquee cycle (so the full weather scroll completes)
+  await new Promise(r => setTimeout(r, getMarqueeDurationMs()));
+
+  // Only switch to sports if sports is ready (otherwise keep weather)
+  if (!sportsReady) {
+    setTimeout(tickerLoop, 0);
+    return;
+  }
+
+  // Show SPORTS for a full cycle
   tickerMode = "sports";
-  setTickerText(sportsLine);
+  setTickerText(sportsLine, { restart: true });
+
+  await new Promise(r => setTimeout(r, getMarqueeDurationMs()));
+
+  // Loop forever
+  setTimeout(tickerLoop, 0);
 }
 
-function rotateTickerMode() {
-  if (tickerMode === "weather") showSports();
-  else showWeather();
-}
-
-// Start immediately + alternate forever
 document.addEventListener("DOMContentLoaded", () => {
-  showWeather();
-  setTimeout(showSports, 15_000);        // quick verify
-  setInterval(rotateTickerMode, 30_000); // rotate every 30s
+  // initial placeholder
+  setTickerText("WEATHER: LOADING…", { restart: false });
+
+  // start the loop once
+  if (!tickerLoopStarted) {
+    tickerLoopStarted = true;
+    tickerLoop();
+  }
 });
 
 
@@ -179,20 +229,25 @@ async function loadWeather() {
     }
 
     weatherLine = "WEATHER: " + parts.join("   •   ");
-    if (tickerMode === "weather") setTickerText(weatherLine);
+    weatherReady = true;
+
+    // If we’re currently showing weather, update content (don’t interrupt cycle)
+    if (tickerMode === "weather") setTickerText(weatherLine, { restart: false });
 
   } catch (err) {
     console.error("Weather error:", err);
     weatherLine = "WEATHER: UNAVAILABLE";
-    if (tickerMode === "weather") setTickerText(weatherLine);
+    weatherReady = true; // allow loop to proceed (it’ll just show unavailable)
+    if (tickerMode === "weather") setTickerText(weatherLine, { restart: false });
+
     const nowMeta = document.getElementById("nowMeta");
     if (nowMeta) nowMeta.textContent = "WEATHER UNAVAILABLE";
   }
 }
 
-// Soft refresh: current conditions feel “live”, forecast doesn’t change often
+// Soft refresh weather
 loadWeather();
-setInterval(loadWeather, 5 * 60 * 1000); // every 5 minutes
+setInterval(loadWeather, 5 * 60 * 1000);
 
 
 /* =========================================================
@@ -221,12 +276,9 @@ async function loadSportsHeadlines() {
       .slice(0, 10);
 
     if (!titles.length) throw new Error("No RSS titles found");
-
-    const parts = titles.map(t => `${sportEmoji(t)} ${t.toUpperCase()}`);
-    return parts.join("   •   ");
+    return titles;
   }
 
-  // Method 1: Jina proxy
   async function fetchViaJina() {
     const url = "https://r.jina.ai/http://www.sportsnet.ca/feed/";
     const res = await fetch(url, { cache: "no-store" });
@@ -237,7 +289,6 @@ async function loadSportsHeadlines() {
     return text.slice(idx);
   }
 
-  // Method 2: AllOrigins
   async function fetchViaAllOrigins() {
     const proxy = "https://api.allorigins.win/get?url=" + encodeURIComponent(rssUrl);
     const res = await fetch(proxy, { cache: "no-store" });
@@ -247,56 +298,54 @@ async function loadSportsHeadlines() {
     return json.contents;
   }
 
-  // Method 3: rss2json
   async function fetchViaRss2Json() {
     const url = "https://api.rss2json.com/v1/api.json?rss_url=" + encodeURIComponent(rssUrl);
     const res = await fetch(url, { cache: "no-store" });
     if (!res.ok) throw new Error(`rss2json HTTP ${res.status}`);
     const json = await res.json();
     if (!json?.items?.length) throw new Error("rss2json: no items");
-
-    const titles = json.items
-      .slice(0, 10)
-      .map(it => (it.title || "").trim())
-      .filter(Boolean);
-
+    const titles = json.items.slice(0, 10).map(it => (it.title || "").trim()).filter(Boolean);
     if (!titles.length) throw new Error("rss2json: no titles");
-
-    const parts = titles.map(t => `${sportEmoji(t)} ${t.toUpperCase()}`);
-    return parts.join("   •   ");
+    return titles;
   }
 
   try {
-    let xmlText;
+    let titles;
 
     try {
-      xmlText = await fetchViaJina();
-      sportsLine = "SPORTS: " + parseRssXml(xmlText);
+      const xml = await fetchViaJina();
+      titles = parseRssXml(xml);
     } catch (e1) {
-      console.warn("Sports fetch via Jina failed:", e1);
+      console.warn("Sports via Jina failed:", e1);
 
       try {
-        xmlText = await fetchViaAllOrigins();
-        sportsLine = "SPORTS: " + parseRssXml(xmlText);
+        const xml = await fetchViaAllOrigins();
+        titles = parseRssXml(xml);
       } catch (e2) {
-        console.warn("Sports fetch via AllOrigins failed:", e2);
+        console.warn("Sports via AllOrigins failed:", e2);
 
-        sportsLine = "SPORTS: " + (await fetchViaRss2Json());
+        titles = await fetchViaRss2Json();
       }
     }
 
-    if (tickerMode === "sports") setTickerText(sportsLine);
+    const decorated = titles.map(t => `${sportEmoji(t)} ${t.toUpperCase()}`);
+    sportsLine = buildSlowSportsLine(decorated);
+    sportsReady = true;
+
+    // If we’re currently showing sports, update content (don’t interrupt cycle)
+    if (tickerMode === "sports") setTickerText(sportsLine, { restart: false });
 
   } catch (err) {
     console.error("Sports RSS error:", err);
     sportsLine = "SPORTS: HEADLINES UNAVAILABLE";
-    if (tickerMode === "sports") setTickerText(sportsLine);
+    sportsReady = true; // allow loop to proceed (it’ll show unavailable)
+    if (tickerMode === "sports") setTickerText(sportsLine, { restart: false });
   }
 }
 
-// Soft refresh sports headlines
+// Soft refresh sports
 loadSportsHeadlines();
-setInterval(loadSportsHeadlines, 5 * 60 * 1000); // every 5 minutes
+setInterval(loadSportsHeadlines, 5 * 60 * 1000);
 
 
 /* =========================================================
