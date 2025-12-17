@@ -13,26 +13,30 @@
   <div class="screen">
     <div class="canvas">
 
-      <!-- MENU (2790 × 1960) -->
+      <!-- MENU ZONE (2790 x 1960) -->
       <section class="zone menu">
-        <img class="img contain" src="menu.jpg" alt="Menu" />
+        <img src="menu.jpg" class="img contain" alt="Menu Board" />
       </section>
 
-      <!-- PROMO A (1050 × 910) -->
-      <section class="zone promoA">
-        <img id="promoTopImg" class="img cover" src="promo1.jpg" alt="Promo A" />
+      <!-- PROMO ZONE (1050 x 1960) -->
+      <section class="zone promo">
+        <img
+          id="promoImg"
+          src="promo1.jpg"
+          class="img cover"
+          alt="Promo"
+        />
+        <!--
+          If you do NOT want cropping, change `cover` to `contain`
+          and use 1960x1050 landscape promo assets.
+        -->
       </section>
 
-      <!-- PROMO B (1050 × 1050) -->
-      <section class="zone promoB">
-        <img id="promoBottomImg" class="img cover" src="promo2.jpg" alt="Promo B" />
-      </section>
-
-      <!-- TICKER (3840 × 200) -->
+      <!-- TICKER (3840 x 200) -->
       <footer class="ticker">
 
-        <!-- 10%: CURRENT CONDITIONS -->
-        <div class="tickNow" id="tickNow">
+        <!-- LEFT 10% : CURRENT WEATHER -->
+        <div class="tickNow">
           <div class="nowTop">
             <span class="nowLabel">NOW</span>
             <span class="nowIcon" id="nowIcon">—</span>
@@ -41,7 +45,7 @@
           <div class="nowMeta" id="nowMeta">FETCHING CURRENT…</div>
         </div>
 
-        <!-- 80%: SCROLL -->
+        <!-- MIDDLE 80% : CONTINUOUS SCROLL -->
         <div class="tickScroll">
           <div class="marquee">
             <div class="marqueeTrack" id="forecastTrack">
@@ -50,7 +54,7 @@
           </div>
         </div>
 
-        <!-- 10%: STACK -->
+        <!-- RIGHT 10% : LOCATION / DATE / TIME -->
         <div class="tickRightStack">
           <div class="loc">OHSWEKEN</div>
           <div class="date" id="dateText">—</div>
