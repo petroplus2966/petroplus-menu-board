@@ -7,38 +7,31 @@
 
   <link rel="stylesheet" href="style.css" />
   <script defer src="app.js"></script>
-
-  <!-- Signage safety refresh -->
-  <meta http-equiv="refresh" content="300">
 </head>
 
 <body>
   <div class="screen">
     <div class="canvas">
 
-      <!-- ================= MENU ================= -->
-      <!-- 2790 × 1960 -->
+      <!-- MENU (2790 × 1960) -->
       <section class="zone menu">
         <img class="img contain" src="menu.jpg" alt="Menu" />
       </section>
 
-      <!-- ================= PROMO A ================= -->
-      <!-- 1050 × 910 -->
+      <!-- PROMO A (1050 × 910) -->
       <section class="zone promoA">
         <img id="promoTopImg" class="img cover" src="promo1.jpg" alt="Promo A" />
       </section>
 
-      <!-- ================= PROMO B ================= -->
-      <!-- 1050 × 1050 -->
+      <!-- PROMO B (1050 × 1050) -->
       <section class="zone promoB">
         <img id="promoBottomImg" class="img cover" src="promo2.jpg" alt="Promo B" />
       </section>
 
-      <!-- ================= TICKER ================= -->
-      <!-- 3840 × 200 -->
+      <!-- TICKER (3840 × 200) -->
       <footer class="ticker">
 
-        <!-- 20%: CURRENT CONDITIONS -->
+        <!-- 10%: CURRENT CONDITIONS -->
         <div class="tickNow" id="tickNow">
           <div class="nowTop">
             <span class="nowLabel">NOW</span>
@@ -48,16 +41,16 @@
           <div class="nowMeta" id="nowMeta">FETCHING CURRENT…</div>
         </div>
 
-        <!-- 60%: 7-DAY SCROLLING FORECAST -->
+        <!-- 80%: SCROLL -->
         <div class="tickScroll">
           <div class="marquee">
             <div class="marqueeTrack" id="forecastTrack">
-              Loading 7-day forecast…
+              Loading ticker…
             </div>
           </div>
         </div>
 
-        <!-- 20%: LOCATION / DATE / TIME -->
+        <!-- 10%: STACK -->
         <div class="tickRightStack">
           <div class="loc">OHSWEKEN</div>
           <div class="date" id="dateText">—</div>
