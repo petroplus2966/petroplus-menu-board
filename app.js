@@ -4,13 +4,12 @@
 function updateClockAndDate() {
   const now = new Date();
 
-  // 24h time
   const hh = String(now.getHours()).padStart(2, "0");
   const mm = String(now.getMinutes()).padStart(2, "0");
+
   const clockEl = document.getElementById("clock");
   if (clockEl) clockEl.textContent = `${hh}:${mm}`;
 
-  // Numeric date (YYYY-MM-DD)
   const dateEl = document.getElementById("dateText");
   if (dateEl) dateEl.textContent = now.toLocaleDateString("en-CA");
 }
@@ -19,11 +18,38 @@ setInterval(updateClockAndDate, 10_000);
 
 
 /* =========================================================
-   TICKER MODE ROTATION (WEATHER <-> SPORTS)
-   Starts immediately, switches quickly once for verification
+   DAILY RELOAD @ 2:00 AM (America/Toronto local device time)
 ========================================================= */
-let weatherLine = "WEATHER: FETCHING 7-DAY FORECAST…";
-let sportsLine  = "SPORTS: FETCHING HEADLINES…";
+function scheduleDailyReloadAt2AM() {
+  const now = new Date();
+  const next = new Date(now);
+
+  next.setHours(2, 0, 0, 0); // 2:00:00 AM today
+
+  // If it's already past 2AM today, schedule for tomorrow
+  if (next <= now) {
+    next.setDate(next.getDate() + 1);
+  }
+
+  const ms = next.getTime() - now.getTime();
+
+  console.log("Next 2AM reload scheduled in ms:", ms);
+
+  setTimeout(() => {
+    location.reload();
+  }, ms);
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  scheduleDailyReloadAt2AM();
+});
+
+
+/* =========================================================
+   TICKER MODE ROTATION (WEATHER <-> SPORTS)
+========================================================= */
+let weatherLine = "WEATHER: FETCHING…";
+let sportsLine  = "SPORTS: FETCHING…";
 let tickerMode  = "weather"; // "weather" | "sports"
 
 function setTickerText(line) {
@@ -47,17 +73,16 @@ function rotateTickerMode() {
   else showWeather();
 }
 
+// Start immediately + alternate forever
 document.addEventListener("DOMContentLoaded", () => {
   showWeather();
-  setTimeout(showSports, 15_000);          // quick verify sports shows
-  setInterval(rotateTickerMode, 30_000);   // then alternate forever
+  setTimeout(showSports, 15_000);        // quick verify
+  setInterval(rotateTickerMode, 30_000); // rotate every 30s
 });
 
 
 /* =========================================================
    WEATHER (CURRENT + 7-DAY)
-   Open-Meteo — no API key
-   Handles BOTH `current` and legacy `current_weather`
 ========================================================= */
 async function loadWeather() {
   const nowIcon = document.getElementById("nowIcon");
@@ -127,7 +152,6 @@ async function loadWeather() {
       if (feels != null) metaParts.push(`FEELS ${Math.round(feels)}°`);
       if (hum != null) metaParts.push(`HUM ${Math.round(hum)}%`);
       if (wind != null) metaParts.push(`WIND ${Math.round(wind)} KM/H`);
-
       nowMeta.textContent = metaParts.join(" • ");
     } else {
       if (nowMeta) nowMeta.textContent = "CURRENT UNAVAILABLE";
@@ -166,9 +190,9 @@ async function loadWeather() {
   }
 }
 
-// Weather: initial + refresh every 30 minutes
+// Soft refresh: current conditions feel “live”, forecast doesn’t change often
 loadWeather();
-setInterval(loadWeather, 30 * 60 * 1000);
+setInterval(loadWeather, 5 * 60 * 1000); // every 5 minutes
 
 
 /* =========================================================
@@ -270,9 +294,9 @@ async function loadSportsHeadlines() {
   }
 }
 
-// Sports: initial + refresh every 10 minutes
+// Soft refresh sports headlines
 loadSportsHeadlines();
-setInterval(loadSportsHeadlines, 10 * 60 * 1000);
+setInterval(loadSportsHeadlines, 5 * 60 * 1000); // every 5 minutes
 
 
 /* =========================================================
