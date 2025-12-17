@@ -1,169 +1,196 @@
-/* =========================================================
-   CLOCK + DATE (RIGHT STACK)
-========================================================= */
-function updateClockAndDate() {
-  const now = new Date();
+:root{
+  --W: 3840;
+  --H: 2160;
 
-  // 24h time
-  const hh = String(now.getHours()).padStart(2, "0");
-  const mm = String(now.getMinutes()).padStart(2, "0");
-  const clockEl = document.getElementById("clock");
-  if (clockEl) clockEl.textContent = `${hh}:${mm}`;
+  --menuW: 2790;
+  --menuH: 1960;
 
-  // Numeric date (YYYY-MM-DD)
-  const dateEl = document.getElementById("dateText");
-  if (dateEl) dateEl.textContent = now.toLocaleDateString("en-CA");
-}
-updateClockAndDate();
-setInterval(updateClockAndDate, 10_000);
+  --promoW: 1050;
+  --promoA_H: 910;
+  --promoB_H: 1050;
 
-
-/* =========================================================
-   WEATHER (CURRENT + 7-DAY)
-   Open-Meteo — no API key
-========================================================= */
-async function loadWeather() {
-  const track   = document.getElementById("forecastTrack");
-  const nowIcon = document.getElementById("nowIcon");
-  const nowTemp = document.getElementById("nowTemp");
-  const nowMeta = document.getElementById("nowMeta");
-
-  if (track) track.textContent = "FETCHING 7-DAY FORECAST…";
-  if (nowIcon) nowIcon.textContent = "—";
-  if (nowTemp) nowTemp.textContent = "—°C";
-  if (nowMeta) nowMeta.textContent = "—";
-
-  // Ohsweken approx
-  const lat = 42.93;
-  const lon = -80.12;
-
-  const url =
-    "https://api.open-meteo.com/v1/forecast" +
-    `?latitude=${lat}&longitude=${lon}` +
-    `&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m` +
-    `&daily=temperature_2m_max,temperature_2m_min,precipitation_sum` +
-    `&forecast_days=7` +
-    `&timezone=America%2FToronto`;
-
-  function conditionFromCode(code) {
-    // Open-Meteo uses WMO weather codes; this is a signage-friendly mapping
-    if (code === 0) return { icon: "☀️", text: "CLEAR" };
-    if ([1, 2].includes(code)) return { icon: "⛅️", text: "PARTLY CLOUDY" };
-    if (code === 3) return { icon: "☁️", text: "CLOUDY" };
-    if ([45, 48].includes(code)) return { icon: "🌫️", text: "FOG" };
-    if ([51, 53, 55, 56, 57].includes(code)) return { icon: "🌦️", text: "DRIZZLE" };
-    if ([61, 63, 65, 66, 67].includes(code)) return { icon: "🌧️", text: "RAIN" };
-    if ([71, 73, 75, 77, 85, 86].includes(code)) return { icon: "❄️", text: "SNOW" };
-    if ([80, 81, 82].includes(code)) return { icon: "🌧️", text: "SHOWERS" };
-    if ([95, 96, 99].includes(code)) return { icon: "⛈️", text: "THUNDER" };
-    return { icon: "🌡️", text: "WEATHER" };
-  }
-
-  // Daily icon based on precip + temp (simple + readable)
-  function dailyIcon(hi, mm) {
-    if (hi <= 0 && mm > 0) return "❄️";
-    if (mm >= 5) return "🌧️";
-    if (mm > 0) return "🌦️";
-    return "☀️";
-  }
-
-  try {
-    const res = await fetch(url, { cache: "no-store" });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-    const data = await res.json();
-
-    /* ---------- CURRENT CONDITIONS (NOW) ---------- */
-    const c = data?.current;
-    if (c && nowIcon && nowTemp && nowMeta) {
-      const t = Math.round(c.temperature_2m);
-      const feels = Math.round(c.apparent_temperature);
-      const hum = Math.round(c.relative_humidity_2m);
-      const wind = Math.round(c.wind_speed_10m);
-      const cond = conditionFromCode(c.weather_code);
-
-      nowIcon.textContent = cond.icon;
-      nowTemp.textContent = `${t}°C`;
-      nowMeta.textContent = `${cond.text} • FEELS ${feels}° • HUM ${hum}% • WIND ${wind} KM/H`;
-    }
-
-    /* ---------- 7-DAY FORECAST (SCROLL) ---------- */
-    const days  = data?.daily?.time ?? [];
-    const highs = data?.daily?.temperature_2m_max ?? [];
-    const lows  = data?.daily?.temperature_2m_min ?? [];
-    const rain  = data?.daily?.precipitation_sum ?? [];
-
-    if (!days.length) throw new Error("No daily forecast");
-
-    const parts = [];
-    for (let i = 0; i < Math.min(7, days.length); i++) {
-      const d = new Date(days[i] + "T00:00:00");
-      const dow = d.toLocaleDateString("en-CA", { weekday: "short" }).toUpperCase();
-      const md  = d.toLocaleDateString("en-CA", { month: "2-digit", day: "2-digit" });
-
-      const hi = Math.round(highs[i]);
-      const lo = Math.round(lows[i]);
-      const mm = Math.round(rain[i] ?? 0);
-
-      const icon = dailyIcon(hi, mm);
-      parts.push(`${dow} ${md} ${icon} ${hi}°/${lo}°`);
-    }
-
-    const line = parts.join("   •   ");
-    if (track) track.textContent = `${line}   •   ${line}`; // duplicate for seamless loop
-
-  } catch (err) {
-    console.error("Weather error:", err);
-    if (track) track.textContent =
-      "WEATHER UNAVAILABLE   •   WEATHER UNAVAILABLE   •   WEATHER UNAVAILABLE";
-    if (nowMeta) nowMeta.textContent = "WEATHER UNAVAILABLE";
-  }
+  --tickerH: 200;
 }
 
-// Initial load + refresh every 30 minutes
-loadWeather();
-setInterval(loadWeather, 30 * 60 * 1000);
+/* ================= RESET ================= */
+*{ box-sizing:border-box; }
 
-
-/* =========================================================
-   OPTIONAL PROMO ROTATION
-   (Only rotates files that exist)
-========================================================= */
-const promoFiles = ["promo1.jpg", "promo2.jpg", "promo3.jpg", "promo4.jpg"];
-
-async function fileExists(path) {
-  try {
-    const r = await fetch(path, { method: "HEAD", cache: "no-store" });
-    return r.ok;
-  } catch {
-    return false;
-  }
+html, body{
+  height:100%;
+  margin:0;
+  background:#000;
+  overflow:hidden;
+  font-family: Arial, Helvetica, sans-serif;
 }
 
-(async function rotatePromos() {
-  const top = document.getElementById("promoTopImg");
-  const bottom = document.getElementById("promoBottomImg");
-  if (!top || !bottom) return;
+/* ================= SCREEN / CANVAS ================= */
+.screen{
+  width:100vw;
+  height:100vh;
+  display:grid;
+  place-items:center;
+  overflow:hidden;
+}
 
-  const available = [];
-  for (const f of promoFiles) {
-    if (await fileExists(f)) available.push(f);
-  }
+/* 4K canvas scaled safely to viewport */
+.canvas{
+  width:3840px;
+  height:2160px;
+  position:relative;
 
-  if (available.length === 0) return;
+  /* scale = min(viewportW / 3840, viewportH / 2160) */
+  --scale: min(calc(100vw / 3840), calc(100vh / 2160));
+  transform: scale(var(--scale));
+  transform-origin: center center;
+}
 
-  if (available.length === 1) {
-    top.src = available[0];
-    bottom.src = available[0];
-    return;
-  }
+/* ================= ZONES ================= */
+.zone{
+  position:absolute;
+  background:#0f0f0f;
+  overflow:hidden;
+}
 
-  let index = 0;
-  top.src = available[index++ % available.length];
-  bottom.src = available[index++ % available.length];
+/* MENU (2790 × 1960) */
+.menu{
+  left:0;
+  top:0;
+  width:2790px;
+  height:1960px;
+}
 
-  setInterval(() => {
-    top.src = available[index++ % available.length];
-    bottom.src = available[index++ % available.length];
-  }, 12_000);
-})();
+/* PROMO A (1050 × 910) */
+.promoA{
+  left:2790px;
+  top:0;
+  width:1050px;
+  height:910px;
+}
+
+/* PROMO B (1050 × 1050) */
+.promoB{
+  left:2790px;
+  top:910px;
+  width:1050px;
+  height:1050px;
+}
+
+/* ================= TICKER (3840 × 200) ================= */
+.ticker{
+  position:absolute;
+  left:0;
+  top:1960px;
+  width:3840px;
+  height:200px;
+
+  background:#1b1b1b;
+  color:#ffffff;
+
+  display:grid;
+  grid-template-columns: 20% 60% 20%;
+  align-items:center;
+
+  padding:0 64px;
+  font-weight:900;
+  text-transform:uppercase;
+  letter-spacing:1.2px;
+}
+
+/* ---------- NOW (CURRENT CONDITIONS) ---------- */
+.tickNow{
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  gap:6px;
+  line-height:1.05;
+}
+
+.nowTop{
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+
+.nowLabel{
+  font-size:30px;
+  opacity:0.9;
+}
+
+.nowIcon{
+  font-size:40px;
+}
+
+.nowTemp{
+  font-size:72px;
+}
+
+.nowMeta{
+  font-size:24px;
+  opacity:0.85;
+  letter-spacing:1px;
+}
+
+/* ---------- SCROLLING FORECAST ---------- */
+.tickScroll{
+  overflow:hidden;
+  white-space:nowrap;
+}
+
+.marquee{
+  width:100%;
+  overflow:hidden;
+}
+
+.marqueeTrack{
+  display:inline-block;
+  padding-left:100%;
+  animation: marquee 65s linear infinite;
+  font-size:46px;
+  will-change:transform;
+}
+
+@keyframes marquee{
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-100%); }
+}
+
+/* ---------- RIGHT STACK (LOCATION / DATE / TIME) ---------- */
+.tickRightStack{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+  justify-content:center;
+  text-align:right;
+  gap:6px;
+  line-height:1.05;
+}
+
+.tickRightStack .loc{
+  font-size:40px;
+  opacity:0.95;
+}
+
+.tickRightStack .date{
+  font-size:32px;
+  opacity:0.85;
+}
+
+.tickRightStack .time{
+  font-size:76px;
+}
+
+/* ================= IMAGES ================= */
+.img{
+  width:100%;
+  height:100%;
+  display:block;
+}
+
+.cover{
+  object-fit:cover;
+}
+
+.contain{
+  object-fit:contain;
+  background:#000;
+}
