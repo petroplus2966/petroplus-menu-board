@@ -1,7 +1,4 @@
 :root{
-  --W:3840;
-  --H:2160;
-
   /* layout ratios from your 4K design */
   --menuWpct:72.65625%;     /* 2790 / 3840 */
   --promoWpct:27.34375%;    /* 1050 / 3840 */
@@ -25,7 +22,7 @@ html,body{
 }
 
 /* =========================================================
-   SCREEN + RESPONSIVE CANVAS (FIRE STICK SAFE)
+   SCREEN + RESPONSIVE CANVAS (CHROME FIRST)
 ========================================================= */
 .screen{
   width:100vw;
@@ -36,7 +33,7 @@ html,body{
   overflow:hidden;
 }
 
-/* Responsive “4K canvas” without transform */
+/* Responsive “4K canvas” without transform (sharp text) */
 .canvas{
   aspect-ratio: 3840 / 2160;
   width: min(100vw, calc(100vh * (3840 / 2160)));
@@ -72,7 +69,7 @@ html,body{
 }
 
 /* =========================================================
-   TICKER (bottom) — base layout
+   TICKER — CHROME OPTIMIZED
 ========================================================= */
 .ticker{
   position:absolute;
@@ -85,25 +82,21 @@ html,body{
   color:#f2f2f2;
 
   display:grid;
-  grid-template-columns: 10% 80% 10%;
+  grid-template-columns: 12% 76% 12%;
   align-items:center;
 
-  padding:0 2.2vw;
+  padding:0 2vw;
   font-weight:900;
   text-transform:uppercase;
   letter-spacing:1px;
-
-  overflow:hidden;
 }
 
-/* =========================================================
-   TICKER – LEFT (CURRENT WEATHER)
-========================================================= */
+/* LEFT — CURRENT WEATHER */
 .tickNow{
   display:flex;
   flex-direction:column;
   justify-content:center;
-  gap:0.25em;
+  gap:0.35em;
   min-width:0;
 }
 
@@ -114,35 +107,33 @@ html,body{
 }
 
 .nowLabel{
-  font-size: clamp(14px, 1.0vw, 26px);
+  font-size: clamp(18px, 1.2vw, 30px);
   opacity:.85;
 }
 
 .nowIcon{
-  font-size: clamp(18px, 1.4vw, 40px);
-}
-
-.nowTemp{
-  font-size: clamp(22px, 2.1vw, 56px);
+  font-size: clamp(26px, 1.8vw, 48px);
   line-height:1;
 }
 
+.nowTemp{
+  font-size: clamp(36px, 2.8vw, 64px);
+  line-height:1.1;
+}
+
 .nowMeta{
-  font-size: clamp(12px, 0.95vw, 22px);
+  font-size: clamp(18px, 1.4vw, 28px);
   opacity:.85;
   white-space:nowrap;
   overflow:hidden;
   text-overflow:ellipsis;
 }
 
-/* =========================================================
-   TICKER – CENTER (MARQUEE)
-========================================================= */
+/* CENTER — SCROLL */
 .tickScroll{
   width:100%;
   overflow:hidden;
-  display:flex;
-  align-items:center;
+  min-width:0;
 }
 
 .marquee{
@@ -154,8 +145,9 @@ html,body{
 .marqueeTrack{
   display:inline-block;
   padding-left:100%;
-  animation: marquee 180s linear infinite; /* slower */
-  font-size: clamp(16px, 1.55vw, 40px);
+  animation: marquee 210s linear infinite; /* slower + readable */
+  font-size: clamp(24px, 2.0vw, 44px);
+  line-height:1.15;
 }
 
 /* Smooth crawl */
@@ -164,28 +156,25 @@ html,body{
   to{ transform: translateX(-100%); }
 }
 
-/* =========================================================
-   TICKER – RIGHT (LOCATION / DATE / TIME)
-========================================================= */
+/* RIGHT — STACK */
 .tickRightStack{
   text-align:right;
   display:flex;
   flex-direction:column;
   justify-content:center;
-  gap:0.25em;
+  gap:0.35em;
   min-width:0;
 }
 
 .tickRightStack .loc{
-  font-size: clamp(14px, 1.0vw, 26px);
-  opacity:.9;
+  font-size: clamp(18px, 1.2vw, 30px);
   white-space:nowrap;
   overflow:hidden;
   text-overflow:ellipsis;
 }
 
 .tickRightStack .date{
-  font-size: clamp(12px, 0.95vw, 24px);
+  font-size: clamp(16px, 1.1vw, 26px);
   opacity:.85;
   white-space:nowrap;
   overflow:hidden;
@@ -193,8 +182,8 @@ html,body{
 }
 
 .tickRightStack .time{
-  font-size: clamp(22px, 2.1vw, 56px);
-  line-height:1;
+  font-size: clamp(36px, 2.8vw, 64px);
+  line-height:1.1;
   white-space:nowrap;
 }
 
@@ -211,7 +200,7 @@ html,body{
 .contain{ object-fit:contain; background:#000; }
 
 /* =========================================================
-   PROMO FADE TRANSITION
+   PROMO FADE TRANSITION (15s slideshow uses this)
 ========================================================= */
 #promoImg{
   opacity:1;
@@ -220,45 +209,4 @@ html,body{
 
 #promoImg.fadeOut{
   opacity:0;
-}
-
-/* =========================================================
-   LG 4K + SILK TICKER HARD FIX (prevents half-cut text)
-   Locks ticker to true 200px and tightens vertical metrics.
-========================================================= */
-.ticker{
-  height: 200px !important;
-  min-height: 200px !important;
-  max-height: 200px !important;
-  overflow: hidden;
-  align-items: center;
-}
-
-/* Force vertical centering inside fixed-height ticker */
-.tickNow, .tickScroll, .tickRightStack{
-  height: 100%;
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-}
-
-/* Center marquee vertically */
-.tickScroll{
-  justify-content:center;
-}
-
-/* Silk/LG glyph clipping prevention */
-.ticker *{
-  line-height: 1.0 !important;
-}
-
-/* Safe caps inside 200px */
-.nowTemp{ font-size: 42px !important; }
-.tickRightStack .time{ font-size: 42px !important; }
-.marqueeTrack{ font-size: 30px !important; }
-
-.nowMeta,
-.tickRightStack .loc,
-.tickRightStack .date{
-  font-size: 18px !important;
 }
