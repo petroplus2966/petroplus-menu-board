@@ -146,7 +146,7 @@ html,body{
 .marqueeTrack{
   display:inline-block;
   padding-left:100%;
-  animation: marquee 180s linear infinite;
+  animation: marquee 210s linear infinite;
   font-size: clamp(16px, 1.55vw, 40px);
 }
 
