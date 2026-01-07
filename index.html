@@ -5,65 +5,74 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Petro Plus Menu Board</title>
 
+  <!-- Disable aggressive caching -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+
   <link rel="stylesheet" href="style.css" />
-  <script defer src="app.js"></script>
 </head>
 
 <body>
   <div class="screen">
     <div class="canvas">
 
-      <!-- MENU ZONE (2790 x 1960) -->
+      <!-- =======================
+           MENU ZONE (LEFT)
+      ======================== -->
       <section class="zone menu">
-        <img src="menu.jpg" class="img contain" alt="Menu Board" />
-      </section>
-
-      <!-- PROMO ZONE (1050 x 1960) -->
-      <section class="zone promo">
         <img
-          id="promoImg"
-          src="promo1.jpg"
-          class="img cover"
-          alt="Promo"
+          src="menu.jpg"
+          alt="Menu"
+          class="img contain"
         />
-        <!--
-          If you do NOT want cropping, change `cover` to `contain`
-          and use 1960x1050 landscape promo assets.
-        -->
       </section>
 
-      <!-- TICKER (3840 x 200) -->
+      <!-- =======================
+           PROMO ZONE (RIGHT)
+           A/B Crossfade Layers
+      ======================== -->
+      <section class="zone promo">
+        <img id="promoA" class="promoSlide isVisible" alt="Promo A" />
+        <img id="promoB" class="promoSlide" alt="Promo B" />
+      </section>
+
+      <!-- =======================
+           TICKER (BOTTOM)
+      ======================== -->
       <footer class="ticker">
 
-        <!-- LEFT 10% : CURRENT WEATHER -->
+        <!-- LEFT: Current Weather -->
         <div class="tickNow">
           <div class="nowTop">
-            <span class="nowLabel">NOW</span>
-            <span class="nowIcon" id="nowIcon">—</span>
+            <span class="nowIcon" id="nowIcon">☀️</span>
+            <span class="nowTemp" id="nowTemp">—°</span>
           </div>
-          <div class="nowTemp" id="nowTemp">—°C</div>
-          <div class="nowMeta" id="nowMeta">FETCHING CURRENT…</div>
+          <div class="nowMeta" id="nowMeta">Loading…</div>
         </div>
 
-        <!-- MIDDLE 80% : CONTINUOUS SCROLL -->
+        <!-- CENTER: Continuous Scroll -->
         <div class="tickScroll">
           <div class="marquee">
-            <div class="marqueeTrack" id="forecastTrack">
-              Loading ticker…
+            <div class="marqueeTrack" id="marqueeTrack">
+              Loading headlines…
             </div>
           </div>
         </div>
 
-        <!-- RIGHT 10% : LOCATION / DATE / TIME -->
+        <!-- RIGHT: Location / Date / Time -->
         <div class="tickRightStack">
-          <div class="loc">OHSWEKEN</div>
+          <div class="loc" id="locText">Brantford, ON</div>
           <div class="date" id="dateText">—</div>
-          <div class="time" id="clock">—:—</div>
+          <div class="time" id="timeText">—:—</div>
         </div>
 
       </footer>
 
     </div>
   </div>
+
+  <!-- Main app logic -->
+  <script src="app.js"></script>
 </body>
 </html>
